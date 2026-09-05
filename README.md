@@ -35,6 +35,9 @@ Pomodoro Bar is a lightweight native macOS menu-bar timer built for individual u
 │   ├── Info.plist
 │   ├── AppIcon-1024.png
 │   ├── AppIcon.icns
+│   ├── Shortcuts
+│   │   ├── Pomodoro Focus On.shortcut
+│   │   └── Pomodoro Focus Off.shortcut
 │   └── com.company.pomodorobar.plist
 ├── Sources/PomodoroBar
 │   ├── PomodoroTimer.swift
@@ -42,6 +45,7 @@ Pomodoro Bar is a lightweight native macOS menu-bar timer built for individual u
 │   └── main.swift
 ├── docs
 │   ├── ARCHITECTURE.md
+│   ├── SHORTCUTS.md
 │   └── JAMF.md
 └── scripts
     ├── build-app.sh
@@ -52,7 +56,7 @@ Pomodoro Bar is a lightweight native macOS menu-bar timer built for individual u
     └── pkg-scripts/postinstall
 ```
 
-See [Architecture](docs/ARCHITECTURE.md) for component and privacy details and [JAMF deployment](docs/JAMF.md) for fleet procedures.
+See [Architecture](docs/ARCHITECTURE.md) for component and privacy details, [Focus Shortcut setup](docs/SHORTCUTS.md) for the illustrated end-user workflow, and [JAMF deployment](docs/JAMF.md) for fleet procedures.
 
 ## Build locally
 
@@ -111,7 +115,15 @@ For the Shortcuts method, create these shortcuts in the Shortcuts app:
 1. **Pomodoro Focus On**: add **Set Focus**, select your work Focus, and set it to remain on until turned off.
 2. **Pomodoro Focus Off**: add **Set Focus** and configure the selected Focus to turn off.
 
-Until both Shortcuts are available, users can select **Set Up Focus** in the Pomodoro Bar popover. The app displays setup instructions before opening Apple Shortcuts. The setup button hides automatically after both configured Shortcut names are detected.
+Apple-approved signed copies of **Pomodoro Focus On** and **Pomodoro Focus Off** are included in `Resources/Shortcuts`. macOS still requires the user to review and import shared Shortcuts; the application never imports or runs bundled files without the user’s action.
+
+Until both Shortcuts are available, users can select **Set Up Focus** in the Pomodoro Bar popover. The guide provides **Import Focus On** and **Import Focus Off** actions that open the bundled, Apple-approved files for review in Shortcuts. The setup button hides automatically after both configured Shortcut names are detected.
+
+![Pomodoro Bar Focus Shortcut setup dialog](docs/images/focus-shortcuts-setup.png)
+
+Users must select **Add Shortcut** in Apple's review screen for each import, then run each Shortcut once to approve any macOS request. See the [illustrated Focus Shortcut setup guide](docs/SHORTCUTS.md) for the complete workflow and administrator verification commands.
+
+macOS does not expose a supported silent Shortcut-import command. A JAMF installer can deploy the signed files inside the app, but each user must approve adding them to their personal Shortcuts collection.
 
 Focus is enabled when a focus timer starts. It is disabled when the timer is paused, reset, skipped, or completed. Break timers leave Focus disabled so normal macOS notifications appear.
 

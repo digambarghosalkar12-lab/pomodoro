@@ -17,6 +17,14 @@ The package installs:
 
 The LaunchAgent starts the app for users at login. The package post-install script bootstraps it immediately when a GUI user is already signed in. If the package is installed at the login window, launchd starts the app after the next successful user login.
 
+The package includes signed **Pomodoro Focus On** and **Pomodoro Focus Off** files. Apple requires each user to review and approve shared Shortcut imports, so the installer does not attempt to add them silently or as root. Users can complete both imports from **Set Up Focus** in the app.
+
+![Pomodoro Bar Focus Shortcut setup dialog](images/focus-shortcuts-setup.png)
+
+Provide users with the [illustrated Focus Shortcut setup guide](SHORTCUTS.md). Each user must import **Focus On**, import **Focus Off**, and run both once. No Accessibility PPPC payload is needed for this workflow because Pomodoro Bar invokes the approved Shortcuts in the background without controlling the macOS interface.
+
+JAMF administrators should not attempt to automate the **Add Shortcut** button. macOS intentionally requires approval in the user's Shortcuts library, and the supported `shortcuts` command-line tool does not offer an import operation.
+
 ## HTTPS script deployment
 
 Use `jamf-deploy.sh` only when the package is hosted at a stable HTTPS URL. Configure these JAMF script parameters:

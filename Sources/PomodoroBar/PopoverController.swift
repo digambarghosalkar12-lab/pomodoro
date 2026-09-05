@@ -111,30 +111,52 @@ final class PopoverController: NSViewController {
         let alert = NSAlert()
         alert.alertStyle = .informational
         alert.messageText = "Set Up Focus Shortcuts"
-        alert.informativeText = "Pomodoro Bar needs two Apple Shortcuts to control Do Not Disturb securely in the background. Create both shortcuts with the exact names below."
+        alert.informativeText = "Import both Apple-approved Shortcuts to let Pomodoro Bar control Do Not Disturb securely in the background. macOS requires you to review and approve each import."
         alert.icon = NSApp.applicationIconImage
+        alert.addButton(withTitle: "Import Focus On")
+        alert.addButton(withTitle: "Import Focus Off")
         alert.addButton(withTitle: "Open Shortcuts")
         alert.addButton(withTitle: "Cancel")
 
         let instructions = NSTextField(wrappingLabelWithString: """
-        1. Create “Pomodoro Focus On”
-           Add Set Focus → Do Not Disturb → On until turned off.
+        1. Select “Import Focus On”, then review and add it in Shortcuts.
 
-        2. Create “Pomodoro Focus Off”
-           Add Set Focus → Do Not Disturb → Off.
+        2. Open this setup again and select “Import Focus Off”.
 
-        3. Run each shortcut once inside Shortcuts and approve any request.
+        3. Run each Shortcut once and approve any request.
 
-        The names must match exactly. Pomodoro Bar never opens Control Center or controls the mouse and keyboard.
+        The setup button disappears after both Shortcuts are installed. Pomodoro Bar never imports a Shortcut without your action.
         """)
         instructions.font = .systemFont(ofSize: 12)
         instructions.textColor = .labelColor
         instructions.frame = NSRect(x: 0, y: 0, width: 390, height: 155)
         alert.accessoryView = instructions
 
-        if alert.runModal() == .alertFirstButtonReturn,
-           let url = URL(string: "shortcuts://") {
-            NSWorkspace.shared.open(url)
+        switch alert.runModal() {
+        case .alertFirstButtonReturn:
+            openBundledShortcut(named: "Pomodoro Focus On")
+        case .alertSecondButtonReturn:
+            openBundledShortcut(named: "Pomodoro Focus Off")
+        case .alertThirdButtonReturn:
+            if let url = URL(string: "shortcuts://") { NSWorkspace.shared.open(url) }
+        default:
+            break
         }
+    }
+
+    private func openBundledShortcut(named name: String) {
+        guard let url = Bundle.main.url(
+            forResource: name,
+            withExtension: "shortcut",
+            subdirectory: "Shortcuts"
+        ) else {
+            let alert = NSAlert()
+            alert.alertStyle = .warning
+            alert.messageText = "Shortcut file not found"
+            alert.informativeText = "Reinstall Pomodoro Bar or ask your administrator to verify the application package."
+            alert.runModal()
+            return
+        }
+        NSWorkspace.shared.open(url)
     }
 }

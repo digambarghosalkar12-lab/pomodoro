@@ -18,6 +18,7 @@ env SWIFTPM_MODULECACHE_OVERRIDE="$BUILD/module-cache" CLANG_MODULE_CACHE_PATH="
 /bin/cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 /bin/cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
 /bin/cp -R "$ROOT/Resources/Sounds" "$APP/Contents/Resources/Sounds"
+/bin/cp -R "$ROOT/Resources/Shortcuts" "$APP/Contents/Resources/Shortcuts"
 /usr/bin/codesign --force --deep --options runtime --sign "$IDENTITY" "$APP"
 
 echo "Built: $APP"
