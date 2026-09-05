@@ -22,7 +22,7 @@ Timer accuracy is calculated from an absolute end date instead of counting timer
 
 ## Data and privacy
 
-The app makes no network requests and includes no analytics. It stores durations and the completion count in the standard preferences domain `com.company.pomodorobar`. The only subprocess it invokes is `/usr/bin/shortcuts`, using administrator-configurable Shortcut names.
+The app makes no network requests and includes no analytics. It stores durations and the completion count in the standard preferences domain `com.rabmagid.pomodorobar`. The only subprocess it invokes is `/usr/bin/shortcuts`, using administrator-configurable Shortcut names.
 
 ## Focus integration
 

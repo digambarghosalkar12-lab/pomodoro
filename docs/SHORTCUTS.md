@@ -55,14 +55,14 @@ shortcuts run "Pomodoro Focus Off"
 The names must exactly match the app defaults. Organizations using different names can configure them per user:
 
 ```sh
-defaults write com.company.pomodorobar focusOnShortcut "Company Focus On"
-defaults write com.company.pomodorobar focusOffShortcut "Company Focus Off"
+defaults write com.rabmagid.pomodorobar focusOnShortcut "Company Focus On"
+defaults write com.rabmagid.pomodorobar focusOffShortcut "Company Focus Off"
 ```
 
 To disable Focus integration:
 
 ```sh
-defaults write com.company.pomodorobar runFocusShortcuts -bool false
+defaults write com.rabmagid.pomodorobar runFocusShortcuts -bool false
 ```
 
 ## Screenshot note

@@ -2,7 +2,7 @@
 # Runs automatically after the installer lays down the app and LaunchAgent.
 set -u
 
-LABEL="com.company.pomodorobar"
+LABEL="com.rabmagid.pomodorobar"
 PLIST="/Library/LaunchAgents/$LABEL.plist"
 CONSOLE_USER=$(/usr/bin/stat -f '%Su' /dev/console)
 

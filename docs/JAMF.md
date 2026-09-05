@@ -7,13 +7,13 @@
 3. Create a Computer Policy scoped to the required Macs.
 4. Add the package with action **Install**.
 5. Optionally add `configure-managed-defaults.sh` as a script with duration parameters.
-6. Configure notification permissions for bundle ID `com.company.pomodorobar` if your organization manages them.
+6. Configure notification permissions for bundle ID `com.rabmagid.pomodorobar` if your organization manages them.
 7. Run the policy once per computer or expose it in Self Service.
 
 The package installs:
 
 - `/Applications/Pomodoro Bar.app`
-- `/Library/LaunchAgents/com.company.pomodorobar.plist`
+- `/Library/LaunchAgents/com.rabmagid.pomodorobar.plist`
 
 The LaunchAgent starts the app for users at login. The package post-install script bootstraps it immediately when a GUI user is already signed in. If the package is installed at the login window, launchd starts the app after the next successful user login.
 
@@ -55,13 +55,13 @@ Add `jamf-uninstall.sh` to a separate Computer Policy and run it with root privi
 | Parameter 4 | Result |
 | --- | --- |
 | `false` or empty | Remove the app, LaunchAgent, and package receipt; retain user history and settings |
-| `true` | Also delete `com.company.pomodorobar.plist` for local users with UID 500 or higher |
+| `true` | Also delete `com.rabmagid.pomodorobar.plist` for local users with UID 500 or higher |
 
 Keeping preferences is useful for temporary removal or upgrades. Use `true` for a complete removal requested by the user or during device decommissioning.
 
 ## Smart Group checks
 
-Useful inventory conditions include application title `Pomodoro Bar.app`, application version `1.0.0`, or package receipt `com.company.pomodorobar.pkg`. After an uninstall policy, request an inventory update if policy scoping depends on current application inventory.
+Useful inventory conditions include application title `Pomodoro Bar.app`, application version `1.0.0`, or package receipt `com.rabmagid.pomodorobar.pkg`. After an uninstall policy, request an inventory update if policy scoping depends on current application inventory.
 
 ## Rollback
 

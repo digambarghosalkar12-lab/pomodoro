@@ -4,8 +4,8 @@
 set -euo pipefail
 
 APP="/Applications/Pomodoro Bar.app"
-LAUNCH_AGENT="/Library/LaunchAgents/com.company.pomodorobar.plist"
-RECEIPT="com.company.pomodorobar.pkg"
+LAUNCH_AGENT="/Library/LaunchAgents/com.rabmagid.pomodorobar.plist"
+RECEIPT="com.rabmagid.pomodorobar.pkg"
 REMOVE_USER_DATA="${4:-false}"
 
 if [[ "$REMOVE_USER_DATA" != "true" && "$REMOVE_USER_DATA" != "false" ]]; then
@@ -35,7 +35,7 @@ if [[ "$REMOVE_USER_DATA" == "true" ]]; then
     (( USER_ID < 500 )) && continue
     USER_HOME=$(/usr/bin/dscl . -read "/Users/$USER_NAME" NFSHomeDirectory 2>/dev/null | /usr/bin/awk '{print $2}')
     [[ -z "$USER_HOME" || ! -d "$USER_HOME/Library/Preferences" ]] && continue
-    PREFS="$USER_HOME/Library/Preferences/com.company.pomodorobar.plist"
+    PREFS="$USER_HOME/Library/Preferences/com.rabmagid.pomodorobar.plist"
     [[ -f "$PREFS" ]] && /bin/rm -f "$PREFS"
   done < <(/usr/bin/dscl . -list /Users UniqueID)
   /usr/bin/killall cfprefsd 2>/dev/null || true

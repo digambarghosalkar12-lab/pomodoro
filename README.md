@@ -38,7 +38,7 @@ Pomodoro Bar is a lightweight native macOS menu-bar timer built for individual u
 │   ├── Shortcuts
 │   │   ├── Pomodoro Focus On.shortcut
 │   │   └── Pomodoro Focus Off.shortcut
-│   └── com.company.pomodorobar.plist
+│   └── com.rabmagid.pomodorobar.plist
 ├── Sources/PomodoroBar
 │   ├── PomodoroTimer.swift
 │   ├── PopoverController.swift
@@ -130,22 +130,22 @@ Focus is enabled when a focus timer starts. It is disabled when the timer is pau
 Use different Shortcut names if required:
 
 ```sh
-defaults write com.company.pomodorobar focusOnShortcut "Company Focus On"
-defaults write com.company.pomodorobar focusOffShortcut "Company Focus Off"
+defaults write com.rabmagid.pomodorobar focusOnShortcut "Company Focus On"
+defaults write com.rabmagid.pomodorobar focusOffShortcut "Company Focus Off"
 ```
 
 Disable integration entirely with:
 
 ```sh
-defaults write com.company.pomodorobar runFocusShortcuts -bool false
+defaults write com.rabmagid.pomodorobar runFocusShortcuts -bool false
 ```
 
 ## Configure timer durations
 
 ```sh
-defaults write com.company.pomodorobar focusMinutes -int 25
-defaults write com.company.pomodorobar shortBreakMinutes -int 5
-defaults write com.company.pomodorobar longBreakMinutes -int 15
+defaults write com.rabmagid.pomodorobar focusMinutes -int 25
+defaults write com.rabmagid.pomodorobar shortBreakMinutes -int 5
+defaults write com.rabmagid.pomodorobar longBreakMinutes -int 15
 ```
 
 Values must be whole minutes. Restart the app after changing defaults to ensure the current phase reloads the new duration. JAMF administrators can use `scripts/configure-managed-defaults.sh` instead.
@@ -180,7 +180,7 @@ The uninstaller stops active instances, unloads the LaunchAgent, removes the app
 
 ## Notifications
 
-Users are asked for notification permission on first launch. In managed environments, allow notifications for bundle ID `com.company.pomodorobar` using the applicable macOS Notifications configuration profile. Focus must be turned off during breaks if users should see other applications’ notifications.
+Users are asked for notification permission on first launch. In managed environments, allow notifications for bundle ID `com.rabmagid.pomodorobar` using the applicable macOS Notifications configuration profile. Focus must be turned off during breaks if users should see other applications’ notifications.
 
 ## Troubleshooting
 
@@ -211,10 +211,10 @@ Check **System Settings → Notifications → Pomodoro Bar** and ensure notifica
 
 ### The app does not start at login
 
-Confirm `/Library/LaunchAgents/com.company.pomodorobar.plist` exists and validate it with:
+Confirm `/Library/LaunchAgents/com.rabmagid.pomodorobar.plist` exists and validate it with:
 
 ```sh
-plutil -lint /Library/LaunchAgents/com.company.pomodorobar.plist
+plutil -lint /Library/LaunchAgents/com.rabmagid.pomodorobar.plist
 ```
 
 LaunchAgents start only inside a user login session, not at the FileVault login screen.

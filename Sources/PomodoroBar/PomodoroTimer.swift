@@ -137,7 +137,7 @@ final class PomodoroTimer {
 
 enum FocusShortcut {
     enum Result { case success, failure(String) }
-    private static let executionQueue = DispatchQueue(label: "com.company.pomodorobar.focus-shortcuts")
+    private static let executionQueue = DispatchQueue(label: "com.rabmagid.pomodorobar.focus-shortcuts")
 
     static func checkConfiguration(completion: @escaping (Bool) -> Void) {
         let defaults = UserDefaults.standard
