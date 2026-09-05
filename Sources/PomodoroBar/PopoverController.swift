@@ -1,5 +1,27 @@
 import AppKit
 
+final class HoverAwareView: NSView {
+    var onPointerEntered: (() -> Void)?
+    var onPointerExited: (() -> Void)?
+    private var hoverTrackingArea: NSTrackingArea?
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let hoverTrackingArea { removeTrackingArea(hoverTrackingArea) }
+        let area = NSTrackingArea(
+            rect: bounds,
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(area)
+        hoverTrackingArea = area
+    }
+
+    override func mouseEntered(with event: NSEvent) { onPointerEntered?() }
+    override func mouseExited(with event: NSEvent) { onPointerExited?() }
+}
+
 final class ProgressRingView: NSView {
     var progress = 0.0 { didSet { needsDisplay = true } }
     var phase: Phase = .focus { didSet { needsDisplay = true } }
@@ -26,12 +48,19 @@ final class PopoverController: NSViewController {
     private let countLabel = NSTextField(labelWithString: "")
     private let focusLabel = NSTextField(wrappingLabelWithString: "")
     private let startButton = NSButton(title: "Start", target: nil, action: nil)
+    private let shortcutsButton = NSButton(title: "Set Up Focus", target: nil, action: nil)
+
+    var onPointerEntered: (() -> Void)?
+    var onPointerExited: (() -> Void)?
 
     init(timer: PomodoroTimer) { self.timer = timer; super.init(nibName: nil, bundle: nil) }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override func loadView() {
-        view = NSView(frame: NSRect(x: 0, y: 0, width: 290, height: 370))
+        let hoverView = HoverAwareView(frame: NSRect(x: 0, y: 0, width: 290, height: 330))
+        hoverView.onPointerEntered = { [weak self] in self?.onPointerEntered?() }
+        hoverView.onPointerExited = { [weak self] in self?.onPointerExited?() }
+        view = hoverView
         phaseLabel.font = .systemFont(ofSize: 15, weight: .semibold)
         phaseLabel.alignment = .center
         timeLabel.font = .monospacedDigitSystemFont(ofSize: 34, weight: .medium)
@@ -46,12 +75,11 @@ final class PopoverController: NSViewController {
 
         let reset = NSButton(title: "Reset", target: self, action: #selector(resetTimer))
         let skip = NSButton(title: "Skip", target: self, action: #selector(skipTimer))
-        let quit = NSButton(title: "Quit", target: NSApp, action: #selector(NSApplication.terminate(_:)))
-        let shortcuts = NSButton(title: "Open Shortcuts", target: self, action: #selector(openShortcuts))
-        [reset, skip, quit].forEach { $0.bezelStyle = .rounded }
+        shortcutsButton.target = self; shortcutsButton.action = #selector(openShortcuts)
+        [reset, skip, shortcutsButton].forEach { $0.bezelStyle = .rounded }
         let controls = NSStackView(views: [reset, startButton, skip])
         controls.orientation = .horizontal; controls.spacing = 8; controls.distribution = .fillEqually
-        let stack = NSStackView(views: [phaseLabel, ring, timeLabel, countLabel, controls, focusLabel, shortcuts, quit])
+        let stack = NSStackView(views: [phaseLabel, ring, timeLabel, countLabel, controls, focusLabel, shortcutsButton])
         stack.orientation = .vertical; stack.spacing = 10; stack.alignment = .centerX
         stack.translatesAutoresizingMaskIntoConstraints = false
         [phaseLabel, timeLabel, countLabel, controls, focusLabel].forEach { $0.widthAnchor.constraint(equalToConstant: 250).isActive = true }
@@ -71,6 +99,7 @@ final class PopoverController: NSViewController {
         ring.phase = timer.phase; ring.progress = timer.progress
         focusLabel.stringValue = timer.focusStatusText
         focusLabel.textColor = timer.focusStatusIsError ? .systemRed : .secondaryLabelColor
+        shortcutsButton.isHidden = timer.shortcutConfigurationChecked && timer.shortcutsConfigured
     }
 
     @objc private func toggle() { timer.toggle() }

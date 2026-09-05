@@ -8,9 +8,9 @@ Pomodoro Bar is a lightweight native macOS menu-bar timer built for individual u
 - Completed focus-session count beside the timer
 - 25-minute focus and 5-minute break cycle
 - 15-minute long break after every fourth completed focus session
-- Animated circular progress indicator
+- Hover-activated popover with an animated circular progress indicator
 - Start, pause, reset, and skip controls
-- Audible completion alerts and native macOS notifications
+- Distinct bundled chimes for focus start, break start, focus completion, and break completion
 - Focus enable/disable integration through configurable Apple Shortcuts
 - Persistent completed-session count
 - Configurable durations through macOS defaults or a JAMF policy
@@ -111,7 +111,7 @@ For the Shortcuts method, create these shortcuts in the Shortcuts app:
 1. **Pomodoro Focus On**: add **Set Focus**, select your work Focus, and set it to remain on until turned off.
 2. **Pomodoro Focus Off**: add **Set Focus** and configure the selected Focus to turn off.
 
-Users can select **Open Shortcuts** in the Pomodoro Bar popover. The app displays these setup instructions before opening Apple Shortcuts, including the exact required names and actions.
+Until both Shortcuts are available, users can select **Set Up Focus** in the Pomodoro Bar popover. The app displays setup instructions before opening Apple Shortcuts. The setup button hides automatically after both configured Shortcut names are detected.
 
 Focus is enabled when a focus timer starts. It is disabled when the timer is paused, reset, skipped, or completed. Break timers leave Focus disabled so normal macOS notifications appear.
 

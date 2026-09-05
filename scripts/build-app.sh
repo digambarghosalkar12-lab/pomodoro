@@ -5,11 +5,11 @@ ROOT="${0:A:h:h}"
 APP_NAME="Pomodoro Bar"
 DIST_DIR="${DIST_DIR:-$ROOT/dist}"
 APP="$DIST_DIR/$APP_NAME.app"
-BUILD="$ROOT/.build"
+BUILD="${BUILD_DIR:-$ROOT/.build}"
 IDENTITY="${CODE_SIGN_IDENTITY:--}"
 
 cd "$ROOT"
-env SWIFTPM_MODULECACHE_OVERRIDE="$BUILD/module-cache" CLANG_MODULE_CACHE_PATH="$BUILD/module-cache" swift build -c release
+env SWIFTPM_MODULECACHE_OVERRIDE="$BUILD/module-cache" CLANG_MODULE_CACHE_PATH="$BUILD/module-cache" swift build -c release --scratch-path "$BUILD"
 
 /bin/mkdir -p "$DIST_DIR"
 /bin/rm -rf "$APP"
@@ -17,6 +17,7 @@ env SWIFTPM_MODULECACHE_OVERRIDE="$BUILD/module-cache" CLANG_MODULE_CACHE_PATH="
 /bin/cp "$BUILD/release/PomodoroBar" "$APP/Contents/MacOS/PomodoroBar"
 /bin/cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 /bin/cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
+/bin/cp -R "$ROOT/Resources/Sounds" "$APP/Contents/Resources/Sounds"
 /usr/bin/codesign --force --deep --options runtime --sign "$IDENTITY" "$APP"
 
 echo "Built: $APP"

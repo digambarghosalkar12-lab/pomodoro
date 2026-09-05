@@ -15,11 +15,14 @@ final class PomodoroTimer {
     private(set) var secondsRemaining: Int
     private(set) var focusStatusText = "Focus automation not checked"
     private(set) var focusStatusIsError = false
+    private(set) var shortcutsConfigured = false
+    private(set) var shortcutConfigurationChecked = false
     private var ticker: Timer?
     private var endDate: Date?
 
     var onChange: (() -> Void)?
     var onPhaseFinished: ((Phase) -> Void)?
+    var onPhaseStarted: ((Phase) -> Void)?
 
     init() { secondsRemaining = Self.duration(for: .focus) }
 
@@ -36,6 +39,7 @@ final class PomodoroTimer {
         endDate = Date().addingTimeInterval(TimeInterval(secondsRemaining))
         ticker = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in self?.tick() }
         if phase == .focus { setFocus(enabled: true) }
+        onPhaseStarted?(phase)
         onChange?()
     }
 
@@ -120,11 +124,48 @@ final class PomodoroTimer {
             self.onChange?()
         }
     }
+
+    func refreshShortcutConfiguration() {
+        FocusShortcut.checkConfiguration { [weak self] configured in
+            guard let self else { return }
+            self.shortcutsConfigured = configured
+            self.shortcutConfigurationChecked = true
+            self.onChange?()
+        }
+    }
 }
 
 enum FocusShortcut {
     enum Result { case success, failure(String) }
     private static let executionQueue = DispatchQueue(label: "com.company.pomodorobar.focus-shortcuts")
+
+    static func checkConfiguration(completion: @escaping (Bool) -> Void) {
+        let defaults = UserDefaults.standard
+        let focusOnName = defaults.string(forKey: "focusOnShortcut") ?? "Pomodoro Focus On"
+        let focusOffName = defaults.string(forKey: "focusOffShortcut") ?? "Pomodoro Focus Off"
+        executionQueue.async {
+            let process = Process()
+            let outputPipe = Pipe()
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/shortcuts")
+            process.arguments = ["list"]
+            process.standardOutput = outputPipe
+            process.standardError = FileHandle.nullDevice
+            do {
+                try process.run()
+                process.waitUntilExit()
+                let data = outputPipe.fileHandleForReading.readDataToEndOfFile()
+                let names = String(data: data, encoding: .utf8)?
+                    .split(whereSeparator: \.isNewline)
+                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) } ?? []
+                let configured = process.terminationStatus == 0
+                    && names.contains(focusOnName)
+                    && names.contains(focusOffName)
+                DispatchQueue.main.async { completion(configured) }
+            } catch {
+                DispatchQueue.main.async { completion(false) }
+            }
+        }
+    }
 
     static func run(enabled: Bool, completion: @escaping (Result) -> Void) {
         let defaults = UserDefaults.standard
