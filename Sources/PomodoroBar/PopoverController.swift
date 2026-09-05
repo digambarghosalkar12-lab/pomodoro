@@ -1,0 +1,111 @@
+import AppKit
+
+final class ProgressRingView: NSView {
+    var progress = 0.0 { didSet { needsDisplay = true } }
+    var phase: Phase = .focus { didSet { needsDisplay = true } }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let rect = bounds.insetBy(dx: 7, dy: 7)
+        let center = NSPoint(x: rect.midX, y: rect.midY)
+        let radius = min(rect.width, rect.height) / 2
+        NSColor.separatorColor.withAlphaComponent(0.35).setStroke()
+        let track = NSBezierPath(ovalIn: rect); track.lineWidth = 8; track.stroke()
+        let path = NSBezierPath()
+        path.appendArc(withCenter: center, radius: radius, startAngle: 90, endAngle: 90 - 360 * progress, clockwise: true)
+        path.lineWidth = 8; path.lineCapStyle = .round
+        (phase == .focus ? NSColor.systemRed : NSColor.systemGreen).setStroke()
+        path.stroke()
+    }
+}
+
+final class PopoverController: NSViewController {
+    private let timer: PomodoroTimer
+    private let ring = ProgressRingView()
+    private let timeLabel = NSTextField(labelWithString: "")
+    private let phaseLabel = NSTextField(labelWithString: "")
+    private let countLabel = NSTextField(labelWithString: "")
+    private let focusLabel = NSTextField(wrappingLabelWithString: "")
+    private let startButton = NSButton(title: "Start", target: nil, action: nil)
+
+    init(timer: PomodoroTimer) { self.timer = timer; super.init(nibName: nil, bundle: nil) }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override func loadView() {
+        view = NSView(frame: NSRect(x: 0, y: 0, width: 290, height: 370))
+        phaseLabel.font = .systemFont(ofSize: 15, weight: .semibold)
+        phaseLabel.alignment = .center
+        timeLabel.font = .monospacedDigitSystemFont(ofSize: 34, weight: .medium)
+        timeLabel.alignment = .center
+        countLabel.textColor = .secondaryLabelColor
+        countLabel.alignment = .center
+        focusLabel.font = .systemFont(ofSize: 11)
+        focusLabel.alignment = .center
+        startButton.bezelStyle = .rounded
+        startButton.keyEquivalent = " "
+        startButton.target = self; startButton.action = #selector(toggle)
+
+        let reset = NSButton(title: "Reset", target: self, action: #selector(resetTimer))
+        let skip = NSButton(title: "Skip", target: self, action: #selector(skipTimer))
+        let quit = NSButton(title: "Quit", target: NSApp, action: #selector(NSApplication.terminate(_:)))
+        let shortcuts = NSButton(title: "Open Shortcuts", target: self, action: #selector(openShortcuts))
+        [reset, skip, quit].forEach { $0.bezelStyle = .rounded }
+        let controls = NSStackView(views: [reset, startButton, skip])
+        controls.orientation = .horizontal; controls.spacing = 8; controls.distribution = .fillEqually
+        let stack = NSStackView(views: [phaseLabel, ring, timeLabel, countLabel, controls, focusLabel, shortcuts, quit])
+        stack.orientation = .vertical; stack.spacing = 10; stack.alignment = .centerX
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        [phaseLabel, timeLabel, countLabel, controls, focusLabel].forEach { $0.widthAnchor.constraint(equalToConstant: 250).isActive = true }
+        ring.widthAnchor.constraint(equalToConstant: 105).isActive = true
+        ring.heightAnchor.constraint(equalToConstant: 105).isActive = true
+        view.addSubview(stack)
+        NSLayoutConstraint.activate([stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20), stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20), stack.topAnchor.constraint(equalTo: view.topAnchor, constant: 16)])
+        refresh()
+    }
+
+    func refresh() {
+        guard isViewLoaded else { return }
+        phaseLabel.stringValue = timer.phase.title
+        timeLabel.stringValue = timer.timeText
+        countLabel.stringValue = "\(timer.completedFocusSessions) focus session\(timer.completedFocusSessions == 1 ? "" : "s") completed"
+        startButton.title = timer.isRunning ? "Pause" : "Start"
+        ring.phase = timer.phase; ring.progress = timer.progress
+        focusLabel.stringValue = timer.focusStatusText
+        focusLabel.textColor = timer.focusStatusIsError ? .systemRed : .secondaryLabelColor
+    }
+
+    @objc private func toggle() { timer.toggle() }
+    @objc private func resetTimer() { timer.reset() }
+    @objc private func skipTimer() { timer.skip() }
+    @objc private func openShortcuts() {
+        NSApp.activate(ignoringOtherApps: true)
+
+        let alert = NSAlert()
+        alert.alertStyle = .informational
+        alert.messageText = "Set Up Focus Shortcuts"
+        alert.informativeText = "Pomodoro Bar needs two Apple Shortcuts to control Do Not Disturb securely in the background. Create both shortcuts with the exact names below."
+        alert.icon = NSApp.applicationIconImage
+        alert.addButton(withTitle: "Open Shortcuts")
+        alert.addButton(withTitle: "Cancel")
+
+        let instructions = NSTextField(wrappingLabelWithString: """
+        1. Create “Pomodoro Focus On”
+           Add Set Focus → Do Not Disturb → On until turned off.
+
+        2. Create “Pomodoro Focus Off”
+           Add Set Focus → Do Not Disturb → Off.
+
+        3. Run each shortcut once inside Shortcuts and approve any request.
+
+        The names must match exactly. Pomodoro Bar never opens Control Center or controls the mouse and keyboard.
+        """)
+        instructions.font = .systemFont(ofSize: 12)
+        instructions.textColor = .labelColor
+        instructions.frame = NSRect(x: 0, y: 0, width: 390, height: 155)
+        alert.accessoryView = instructions
+
+        if alert.runModal() == .alertFirstButtonReturn,
+           let url = URL(string: "shortcuts://") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+}

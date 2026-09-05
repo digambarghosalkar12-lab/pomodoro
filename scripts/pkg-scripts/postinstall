@@ -1,0 +1,20 @@
+#!/bin/zsh
+# Runs automatically after the installer lays down the app and LaunchAgent.
+set -u
+
+LABEL="com.company.pomodorobar"
+PLIST="/Library/LaunchAgents/$LABEL.plist"
+CONSOLE_USER=$(/usr/bin/stat -f '%Su' /dev/console)
+
+if [[ "$CONSOLE_USER" == "root" || "$CONSOLE_USER" == "loginwindow" || -z "$CONSOLE_USER" ]]; then
+  # launchd loads the LaunchAgent automatically when the next GUI user signs in.
+  exit 0
+fi
+
+USER_ID=$(/usr/bin/id -u "$CONSOLE_USER")
+/bin/launchctl enable "gui/$USER_ID/$LABEL" 2>/dev/null || true
+/bin/launchctl bootout "gui/$USER_ID/$LABEL" 2>/dev/null || true
+/bin/launchctl bootstrap "gui/$USER_ID" "$PLIST" 2>/dev/null || true
+/bin/launchctl kickstart -k "gui/$USER_ID/$LABEL" 2>/dev/null || true
+
+exit 0
